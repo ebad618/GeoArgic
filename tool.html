@@ -1,0 +1,632 @@
+
+<!DOCTYPE html>
+<html lang="en">>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeoAgric - Crop Suitability Tool</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet EasyPrint -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.min.js"></script>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- html2canvas for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* Your CSS unchanged except maybe some minor spacing for clarity */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #F0F8FF;
+      color: #333333;
+    }
+    nav {
+      background: linear-gradient(145deg, #ffffff, #e6e6e6);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      margin: 20px auto;
+      padding: 0 40px;
+      max-width: 1500px;
+      transition: box-shadow 0.3s ease;
+    }
+    nav:hover {
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2),
+                  inset 0 2px 5px rgba(255, 255, 255, 0.5);
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+    .navbar-left a {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #2d3748;
+      text-decoration: none;
+      text-shadow: 1px 1px 2px #bbb;
+      letter-spacing: 1px;
+    }
+    .navbar-right {
+      display: flex;
+      gap: 24px;
+      
+    }
+    .navbar-right a {
+      position: relative;
+      padding: 12px 22px;
+      background: linear-gradient(145deg, #f7f9fc, #d6dde8);
+      border-radius: 14px;
+      box-shadow: 5px 5px 12px #b0b8c1,
+                  -5px -5px 12px #ffffff;
+      text-decoration: none;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      letter-spacing: 0.03em;
+    }
+    .navbar-right a:hover {
+      transform: translateY(-3px);
+      box-shadow: inset 2px 2px 8px #b0b8c1,
+                  inset -2px -2px 8px #ffffff;
+      background: linear-gradient(145deg, #e2e8f0, #f8fafc);
+      color: #1a202c;
+    }
+    .navbar-right a.active {
+      background: linear-gradient(145deg, #a3bffa, #7189e6);
+      box-shadow: inset 4px 4px 14px #5369d8,
+                  inset -4px -4px 14px #b5c2fa;
+      color: white;
+      font-weight: 700;
+    }
+    body.dark-mode {
+  background-color: #1e1e2f;
+  color: #e0e0e0;
+}
+
+body.dark-mode nav {
+  background: linear-gradient(145deg, #2d2d3a, #1c1c2b);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .navbar-left a,
+body.dark-mode .navbar-right a {
+  color: #e0e0e0;
+}
+
+body.dark-mode .navbar-right a {
+  background: linear-gradient(145deg, #3c3c5a, #2a2a3f);
+  box-shadow: 5px 5px 12px #151524, -5px -5px 12px #2f2f45;
+}
+
+body.dark-mode .navbar-right a:hover {
+  background: linear-gradient(145deg, #28283a, #3a3a5a);
+  color: #fff;
+}
+
+body.dark-mode .navbar-right a.active {
+  background: linear-gradient(145deg, #4e5d94, #3b4a79);
+  box-shadow: inset 4px 4px 14px #2e3a5c, inset -4px -4px 14px #5e6aa3;
+  color: white;
+}
+
+body.dark-mode .upload-panel {
+  background-color: #2a2a3f;
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.5), -4px -4px 12px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .upload-panel:hover {
+  background: linear-gradient(145deg, #2a2a3f, #1c1c2c);
+  color: #fff;
+}
+
+body.dark-mode select,
+body.dark-mode input[type="file"],
+body.dark-mode input[type="number"] {
+  background-color: #3a3a5a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+body.dark-mode .upload-panel h2 {
+  color: white;
+}
+
+
+body.dark-mode button {
+  background: linear-gradient(145deg, #4e5d94, #3b4a79);
+  box-shadow: 4px 4px 10px #1a1a30, -4px -4px 10px #5a6aa3;
+}
+
+body.dark-mode footer {
+  background: linear-gradient(145deg, #3b4a79, #2c3a60);
+  color: #e0e0e0;
+  box-shadow: 4px 4px 15px rgba(30, 30, 50, 0.6), -4px -4px 15px rgba(70, 80, 120, 0.7);
+}
+
+body.dark-mode .heatmap-result,
+body.dark-mode #summaryPanel,
+body.dark-mode canvas {
+  background-color: #2e2e40;
+  color: #f0f0f0;
+}
+
+    .main-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 40px auto;
+      gap: 30px;
+      padding: 0 20px;
+      transition: transform 0.4s ease;
+    }
+    .upload-panel {
+      flex: 1;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.1), -4px -4px 12px rgba(255, 255, 255, 0.7);
+    }
+    .upload-panel:hover{
+      background: linear-gradient(145deg, #ffffff, #e6e6e6);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      color: #1a202c;
+    }
+    .upload-panel h2 {
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      color: #1e2a38;
+    }
+    .upload-panel label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 500;
+    }
+    .upload-panel select,
+    .upload-panel input[type="file"],
+    .upload-panel input[type="number"] {
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    .upload-panel button {
+      padding: 12px;
+      border-radius: 15px;
+      border: none;
+      background: linear-gradient(145deg, #2e86de, #1b4f72);
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 4px 4px 10px #1a3a6e, -4px -4px 10px #3a7ade;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+    .upload-panel button:hover {
+      background: linear-gradient(145deg, #1b4f72, #2e86de);
+    }
+    #map {
+      flex: 2;
+      height: 600px;
+      border-radius: 20px;
+      box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.1), -4px -4px 12px rgba(255, 255, 255, 0.7);
+      position: relative;
+    }
+    .heatmap-result {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      font-weight: bold;
+      color: #1a3a6e;
+      min-height: 30px;
+    }
+    canvas {
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #summaryPanel {
+      margin-top: 10px;
+      padding: 10px;
+      background: #eef;
+      border-radius: 10px;
+      display: none;
+    }
+    #summaryList {
+      margin-left: 20px;
+    }
+    footer {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      padding: 15px 40px;
+      background: linear-gradient(145deg, #a3bffa, #7189e6);
+      color: white;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 20px;
+      box-shadow: 4px 4px 15px rgba(55, 75, 165, 0.6),
+                  -4px -4px 15px rgba(114, 137, 230, 0.7);
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+    @media (max-width: 900px) {
+      .main-container { flex-direction: column; padding: 0 10px; }
+      nav { padding: 0 20px; }
+      #map { height: 400px; }
+      footer {
+        padding: 15px 20px;
+        margin: 0 15px 20px;
+        font-size: 0.9rem;
+        border-radius: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="navbar">
+      <div class="navbar-left">
+        <a href="#">GeoAgric</a>
+      </div>
+      <div class="navbar-right">
+        <a href="index.html">Home</a>
+        <a href="tool.html" class="active">Tool</a>
+        <a href="cornoil.html">Corn Oil</a>
+        <a href="host.html">Host</a>
+        <button id="themeToggle" style="padding: 10px 15px; border-radius: 12px; border: none; cursor: pointer; background-color: #2d3748; color: #fff; font-weight: bold;">🌙 Dark</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <div class="upload-panel">
+      <h2>Crop Suitability Input</h2>
+
+      <label for="model">Upload Model (.pkl):</label>
+      <input type="file" id="model" accept=".pkl,.joblib" />
+
+      <label for="CropType">Crop Type:</label>
+      <select id="CropType">
+        <option value="" disabled selected>Choose The Option</option>
+        <option value="Wheat">Wheat</option>
+        <option value="Rice">Rice</option>
+        <option value="Maize">Maize</option>
+        <option value="Barley">Barley</option>
+      </select>
+
+      <label for="SoilType">Soil Type:</label>
+      <select id="SoilType">
+        <option value="" disabled selected>Choose The Option</option>
+        <option value="Clay">Clay</option>
+        <option value="Sandy">Sandy</option>
+        <option value="Loam">Loam</option>
+        <option value="Silt">Silt</option>
+      </select>
+
+      <label for="FertilizerType">Fertilizer Type:</label>
+      <select id="FertilizerType">
+        <option value="" disabled selected>Choose The Option</option>
+        <option value="Nitrogen">Nitrogen</option>
+        <option value="Phosphorus">Phosphorus</option>
+        <option value="Potassium">Potassium</option>
+        <option value="Mixed">Mixed</option>
+      </select>
+
+      <label for="Temperature">Temperature (°C):</label>
+      <input type="number" step="any" id="Temperature" />
+
+      <label for="Humidity">Humidity (%):</label>
+      <input type="number" step="any" id="Humidity" />
+
+      <label for="Rainfall">Rainfall (mm):</label>
+      <input type="number" step="any" id="Rainfall" />
+
+      <label for="PestInfestation">Pest Infestation (0–5):</label>
+      <input type="number" id="PestInfestation" min="0" max="5" />
+
+      <button onclick="runPrediction()">Run Prediction</button>
+
+      <div id="result" class="heatmap-result"></div>
+      <canvas id="resultChart" width="300" height="150"></canvas>
+      <div id="summaryPanel">
+        <strong>Summary:</strong>
+        <ul id="summaryList"></ul>
+      </div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <footer>
+    &copy; 2025 GeoAgric. All rights reserved.
+  </footer>
+
+  <script>
+    // Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const isDarkMode = localStorage.getItem('theme') === 'dark';
+
+if (isDarkMode) {
+  document.body.classList.add('dark-mode');
+  themeToggle.textContent = '☀️ Light';
+}
+
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  themeToggle.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+});
+
+    const normalLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and others',
+      maxZoom: 19
+    });
+
+    const map = L.map('map', {
+      center: [20, 0],
+      zoom: 2,
+      layers: [normalLayer]
+    });
+
+    const baseMaps = {
+      "Normal Map": normalLayer,
+      "Satellite": satelliteLayer
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polygon: true,
+        rectangle: true,
+        polyline: false,
+        circle: false,
+        marker: false,
+        circlemarker: false
+      },
+      edit: {
+        featureGroup: drawnItems
+      }
+    });
+    map.addControl(drawControl);
+
+    const printer = L.easyPrint({
+      exportOnly: true,
+      hideControlContainer: true
+    }).addTo(map);
+
+    // Ensure only one drawn shape at a time
+    map.on(L.Draw.Event.CREATED, function (e) {
+      drawnItems.clearLayers();
+      drawnItems.addLayer(e.layer);
+    });
+
+    let chartInstance;
+
+    async function runPrediction() {
+      const temp = parseFloat(document.getElementById('Temperature').value);
+      const hum = parseFloat(document.getElementById('Humidity').value);
+      const rain = parseFloat(document.getElementById('Rainfall').value);
+      const pest = parseInt(document.getElementById('PestInfestation').value);
+
+      if (
+        isNaN(temp) || isNaN(hum) || isNaN(rain) || isNaN(pest) ||
+        !document.getElementById('CropType').value ||
+        !document.getElementById('SoilType').value ||
+        !document.getElementById('FertilizerType').value
+      ) {
+        alert('Please fill in all inputs before running prediction.');
+        return;
+      }
+
+      const inputData = {
+        CropType: document.getElementById('CropType').value,
+        SoilType: document.getElementById('SoilType').value,
+        FertilizerType: document.getElementById('FertilizerType').value,
+        Temperature: temp,
+        Humidity: hum,
+        Rainfall: rain,
+        PestInfestation: pest
+      };
+
+      try {
+        const response = await fetch('http://localhost:5500/predict', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(inputData)
+        });
+        const data = await response.json();
+        if (data.error) {
+          document.getElementById('result').textContent = 'Error: ' + data.error;
+          return;
+        }
+
+        const suitabilityText = data.suitability === 1 ? 'Suitable' : 'Not Suitable';
+        // Fix template string usage inside innerHTML:
+        document.getElementById('result').innerHTML =
+          `<b>Status:</b> ${suitabilityText}<br><b>Probability:</b> ${(data.suitability_probability * 100).toFixed(2)}%`;
+
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(document.getElementById('resultChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Temperature', 'Humidity', 'Rainfall', 'Pest'],
+            datasets: [{
+              label: 'Input Values',
+              data: [temp, hum, rain, pest],
+              backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
+            }]
+          },
+          options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        const summaryData = {
+          Crop: inputData.CropType,
+          Soil: inputData.SoilType,
+          Fertilizer: inputData.FertilizerType,
+          Temperature: temp + ' °C',
+          Humidity: hum + ' %',
+          Rainfall: rain + ' mm',
+          PestInfestation: pest,
+          Suitability: suitabilityText,
+          Probability: (data.suitability_probability * 100).toFixed(2) + '%'
+        };
+        const summaryList = document.getElementById('summaryList');
+        summaryList.innerHTML = '';
+        for (let key in summaryData) {
+          const li = document.createElement('li');
+          li.textContent = `${key}: ${summaryData[key]}`;
+          summaryList.appendChild(li);
+        }
+        document.getElementById('summaryPanel').style.display = 'block';
+
+      } catch (error) {
+        document.getElementById('result').textContent = 'Prediction failed: ' + error.toString();
+      }
+    }
+
+ async function runPrediction() {
+  const temp = parseFloat(document.getElementById('Temperature').value);
+  const hum = parseFloat(document.getElementById('Humidity').value);
+  const rain = parseFloat(document.getElementById('Rainfall').value);
+  const pest = parseInt(document.getElementById('PestInfestation').value);
+
+  if (
+    isNaN(temp) || isNaN(hum) || isNaN(rain) || isNaN(pest) ||
+    !document.getElementById('CropType').value ||
+    !document.getElementById('SoilType').value ||
+    !document.getElementById('FertilizerType').value
+  ) {
+    alert('Please fill in all inputs before running prediction.');
+    return;
+  }
+
+  const inputData = {
+    CropType: document.getElementById('CropType').value,
+    SoilType: document.getElementById('SoilType').value,
+    FertilizerType: document.getElementById('FertilizerType').value,
+    Temperature: temp,
+    Humidity: hum,
+    Rainfall: rain,
+    PestInfestation: pest
+  };
+
+  try {
+    const response = await fetch('http://localhost:5500/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(inputData)
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      document.getElementById('result').textContent = 'Error: ' + data.error;
+      return;
+    }
+
+    const suitabilityText = data.suitability === 1 ? 'Suitable' : 'Not Suitable';
+    document.getElementById('result').innerHTML =
+      `<b>Status:</b> ${suitabilityText}<br><b>Probability:</b> ${(data.suitability_probability * 100).toFixed(2)}%`;
+
+    // Chart
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(document.getElementById('resultChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Temperature', 'Humidity', 'Rainfall', 'Pest'],
+        datasets: [{
+          label: 'Input Values',
+          data: [temp, hum, rain, pest],
+          backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    const summaryData = {
+      Crop: inputData.CropType,
+      Soil: inputData.SoilType,
+      Fertilizer: inputData.FertilizerType,
+      Temperature: temp + ' °C',
+      Humidity: hum + ' %',
+      Rainfall: rain + ' mm',
+      PestInfestation: pest,
+      Suitability: suitabilityText,
+      Probability: (data.suitability_probability * 100).toFixed(2) + '%'
+    };
+    const summaryList = document.getElementById('summaryList');
+    summaryList.innerHTML = '';
+    for (let key in summaryData) {
+      const li = document.createElement('li');
+      li.textContent = `${key}: ${summaryData[key]}`;
+      summaryList.appendChild(li);
+    }
+    document.getElementById('summaryPanel').style.display = 'block';
+
+    // ✅ Show result on map
+    if (drawnItems.getLayers().length > 0) {
+      const layer = drawnItems.getLayers()[0];
+
+      // Popup message
+      const popupContent = `
+        <b>Status:</b> ${suitabilityText}<br>
+        <b>Probability:</b> ${(data.suitability_probability * 100).toFixed(2)}%<br>
+        <b>Crop:</b> ${inputData.CropType}<br>
+        <b>Soil:</b> ${inputData.SoilType}
+      `;
+      layer.bindPopup(popupContent).openPopup();
+
+      // Color code layer
+      layer.setStyle({
+        color: data.suitability === 1 ? 'green' : 'red',
+        fillOpacity: 0.4,
+        weight: 3
+      });
+
+    } else {
+      alert("Please draw an area on the map to visualize the prediction.");
+    }
+
+  } catch (error) {
+    document.getElementById('result').textContent = 'Prediction failed: ' + error.toString();
+  }
+}
+
+  </script>
+</body>
+</html>

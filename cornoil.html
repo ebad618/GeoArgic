@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agroltix - Corn Oil</title>
+<script>
+  if (!localStorage.getItem("theme")) {
+    localStorage.setItem("theme", "light");
+  }
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("theme"));
+</script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+        body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      color: #333333;
+      background-color: #F0F8FF;
+    }
+
+    nav {
+      background: linear-gradient(145deg, #ffffff, #e6e6e6);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      border-radius: 20px;
+      margin: 20px auto;
+      padding: 0 40px;
+      max-width: 1500px;
+      transition: box-shadow 0.3s ease;
+    }
+    
+    nav:hover {
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2),
+                  inset 0 2px 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+/*
+    .navbar-left {
+      margin-right: 60px; # Added margin-right to increase gap
+    }*/
+
+    .navbar-left a {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #2d3748;
+      text-decoration: none;
+      text-shadow: 1px 1px 2px #bbb;
+      letter-spacing: 1px;
+    }
+
+    .navbar-right {
+      display: flex;
+      gap: 24px;
+    }
+
+    .navbar-right a {
+      position: relative;
+      padding: 12px 22px;
+      background: linear-gradient(145deg, #f7f9fc, #d6dde8);
+      border-radius: 14px;
+      box-shadow: 5px 5px 12px #b0b8c1,
+                  -5px -5px 12px #ffffff;
+      text-decoration: none;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      letter-spacing: 0.03em;
+    }
+
+    .navbar-right a:hover {
+      transform: translateY(-3px);
+      box-shadow: inset 2px 2px 8px #b0b8c1,
+                  inset -2px -2px 8px #ffffff;
+      background: linear-gradient(145deg, #e2e8f0, #f8fafc);
+      color: #1a202c;
+    }
+
+    .navbar-right a.active {
+      background: linear-gradient(145deg, #a3bffa, #7189e6);
+      box-shadow: inset 4px 4px 14px #5369d8,
+                  inset -4px -4px 14px #b5c2fa;
+      color: white;
+      font-weight: 700;
+    }
+        body.dark-mode {
+  background-color: #1e1e2f;
+  color: #e0e0e0;
+}
+
+body.dark-mode nav {
+  background: linear-gradient(145deg, #2d2d3a, #1c1c2b);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .navbar-left a,
+body.dark-mode .navbar-right a {
+  color: #e0e0e0;
+}
+
+body.dark-mode .navbar-right a {
+  background: linear-gradient(145deg, #3c3c5a, #2a2a3f);
+  box-shadow: 5px 5px 12px #151524, -5px -5px 12px #2f2f45;
+}
+
+body.dark-mode .navbar-right a:hover {
+  background: linear-gradient(145deg, #28283a, #3a3a5a);
+  color: #fff;
+}
+
+body.dark-mode .navbar-right a.active {
+  background: linear-gradient(145deg, #4e5d94, #3b4a79);
+  box-shadow: inset 4px 4px 14px #2e3a5c, inset -4px -4px 14px #5e6aa3;
+  color: white;
+}
+
+body.dark-mode .upload-panel {
+  background-color: #2a2a3f;
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.5), -4px -4px 12px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .upload-panel:hover {
+  background: linear-gradient(145deg, #2a2a3f, #1c1c2c);
+  color: #fff;
+}
+
+body.dark-mode select,
+body.dark-mode input[type="file"],
+body.dark-mode input[type="number"] {
+  background-color: #3a3a5a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+body.dark-mode .upload-panel h2 {
+  color: white;
+}
+
+
+body.dark-mode button {
+  background: linear-gradient(145deg, #4e5d94, #3b4a79);
+  box-shadow: 4px 4px 10px #1a1a30, -4px -4px 10px #5a6aa3;
+}
+
+body.dark-mode footer {
+  background: linear-gradient(145deg, #3b4a79, #2c3a60);
+  color: #e0e0e0;
+  box-shadow: 4px 4px 15px rgba(30, 30, 50, 0.6), -4px -4px 15px rgba(70, 80, 120, 0.7);
+}
+
+body.dark-mode .heatmap-result,
+body.dark-mode #summaryPanel,
+body.dark-mode canvas {
+  background-color: #2e2e40;
+  color: #f0f0f0;
+}
+
+
+
+    .heading-box {
+  max-width: 1100px;
+  margin: 25px auto 0;
+  padding: 20px;
+  background: linear-gradient(145deg, #fdfdfd, #e3e9f1);
+  border-radius: 20px;
+  text-align: center;
+  color: #2d3748;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px #bbb;
+  box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.1),
+              -5px -5px 15px #ffffff;
+}
+
+    .header-image {
+      max-width: 1100px;
+      margin: 30px auto 40px;
+      border-radius: 20px;
+      box-shadow: 8px 8px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .header-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
+      transition: transform 0.4s ease;
+    }
+    .header-image img:hover {
+      transform: scale(1.03);
+    }
+
+    .content-container {
+      max-width: 900px;
+      margin: 0 auto 50px;
+      padding: 30px 40px;
+      background: #ffffffcc;
+      border-radius: 20px;
+      box-shadow: 8px 8px 25px rgba(0, 0, 0, 0.12);
+      color: #1e2a38;
+      backdrop-filter: saturate(180%) blur(15px);
+      flex-grow: 1;
+    }
+
+    .content-section {
+      padding: 20px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .content-section:last-child {
+      border-bottom: none;
+    }
+
+    .content-container h2 {
+      font-size: 2.1rem;
+      margin-bottom: 18px;
+      color: #3b49df;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .content-container p {
+      margin-bottom: 20px;
+      text-align: justify;
+      font-size: 1.16rem;
+      line-height: 1.8;
+    }
+
+    .content-container ul {
+      padding-left: 28px;
+      margin-bottom: 30px;
+      list-style-type: disc;
+      color: #34495e;
+      font-size: 1.1rem;
+    }
+
+    .content-container ul li {
+      margin-bottom: 10px;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      padding: 15px 40px;
+      background: linear-gradient(145deg, #a3bffa, #7189e6);
+      color: white;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 20px;
+      box-shadow: 4px 4px 15px rgba(55, 75, 165, 0.6),
+                  -4px -4px 15px rgba(114, 137, 230, 0.7);
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 25px;
+      }
+
+      .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 20px 0;
+        gap: 15px;
+      }
+
+      .navbar-right {
+        flex-direction: column;
+        width: 100%;
+        align-items: flex-start;
+      }
+
+      .navbar-right a {
+        width: 100%;
+        text-align: center;
+      }
+
+      .content-container {
+        padding: 25px 20px;
+        margin: 0 15px 40px;
+      }
+
+      .content-container h2 {
+        font-size: 1.8rem;
+      }
+
+      .header-image {
+        margin: 20px 15px 30px;
+        border-radius: 15px;
+      }
+
+      footer {
+        padding: 15px 20px;
+        margin: 0 15px 20px;
+        font-size: 0.9rem;
+        border-radius: 15px;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+</head>
+<body>
+  <nav>
+    <div class="navbar">
+      <div class="navbar-left">
+        <a href="index.html">GeoAgric</a>
+      </div>
+      <div class="navbar-right">
+        <a href="index.html">Home</a>
+        <a href="tool.html">Tool</a>
+        <a href="cornoil.html" class="active">Corn Oil</a>
+        <a href="host.html">Host</a>
+        <a href="javascript:void(0);" id="themeToggle">🌙 Dark</a>
+      </div>
+    </div>
+  </nav>
+<div class="heading-box">
+  <h1>
+    Corn Oil
+  </h1>
+</div>
+  <div class="header-image">
+    <img src="corn-oil-1296x728-feature.jpg" alt="Corn Oil Bottle and Corn Kernels" />
+  </div>
+
+  <div class="content-container">
+    <div class="content-section" id="about">
+      <h2>About Corn Oil</h2>
+      <p>Corn oil is a popular vegetable oil extracted from the germ of corn kernels. It is commonly used in cooking for its mild flavor and high smoke point, making it ideal for frying, sautéing, baking, and salad dressings.</p>
+    </div>
+
+    <div class="content-section" id="benefits">
+      <h2>Health Benefits</h2>
+      <ul>
+        <li>Rich in polyunsaturated fats</li>
+        <li>Contains Vitamin E</li>
+        <li>Supports heart health</li>
+        <li>Helps reduce cholesterol levels</li>
+      </ul>
+    </div>
+
+    <div class="content-section" id="nutrition">
+      <h2>Nutritional Information (per 1 tbsp)</h2>
+      <ul>
+        <li>Calories: 120</li>
+        <li>Total Fat: 14g</li>
+        <li>Saturated Fat: 1.5g</li>
+        <li>Polyunsaturated Fat: 8g</li>
+        <li>Monounsaturated Fat: 3g</li>
+      </ul>
+    </div>
+
+    <div class="content-section" id="process">
+      <h2>How Corn Oil is Made</h2>
+      <p>The oil is extracted from corn germ through mechanical pressing and/or solvent extraction. It then undergoes refining processes to remove impurities, odor, and color, producing a clear, light oil perfect for cooking.</p>
+    </div>
+
+    <div class="content-section" id="comparison">
+      <h2>Corn Oil vs. Other Oils</h2>
+      <ul>
+        <li><strong>Olive Oil:</strong> Corn oil has a higher smoke point.</li>
+        <li><strong>Canola Oil:</strong> Corn oil contains more polyunsaturated fats.</li>
+        <li><strong>Coconut Oil:</strong> Corn oil is lower in saturated fat.</li>
+      </ul>
+    </div>
+
+    <div class="content-section" id="facts">
+      <h2>Fun Facts</h2>
+      <ul>
+        <li>Used in the production of biodiesel.</li>
+        <li>Often found in margarine and processed foods.</li>
+        <li>One of the most affordable oils available.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 GeoAgric. All rights reserved.
+  </footer>
+<script>
+ // Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const isDarkMode = localStorage.getItem('theme') === 'dark';
+
+if (isDarkMode) {
+  document.body.classList.add('dark-mode');
+  themeToggle.textContent = '☀️ Light';
+}
+
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  themeToggle.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+});
+</script>
+</body>
+</html>
